@@ -189,9 +189,10 @@ def score(predict_list, test_list):
     size = len(predict_list)
     right_num = 0
     if len(test_list) == size:
-        for i in test_list:
+        for i in range(size):
             if predict_list[i] == test_list[i]:
                 right_num = right_num + 1
-        return right_num * 1.0 / size
     else:
         raise Exception('predict_list size not equal to test_list size!')
+
+    return (right_num * 1.0) / (size * 1.0)
