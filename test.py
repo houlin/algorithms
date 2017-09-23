@@ -1,25 +1,28 @@
 import bayes
 
 if True:
-    X_train, y_train, X_test, y_test = bayes.loadDataSet2()
+    X_train, y_train, X_test, y_test = bayes.loadDataSet()
     myVocabList = bayes.creatVocabList(X_train)
-    # print(len(myVocabList))
-    metricVecList = []
+
+    trainVecList = []
     for doc in X_train:
-        metricVec = bayes.setOfWords2Vec(myVocabList, doc)
-        metricVecList.append(metricVec)
-    # print(len(metricVecList))
-    nbModel = bayes.trainNBModel(metricVecList, y_train)
-    # testListOPost = []
-    testMetricVecList = []
+        docVec = bayes.setOfWords2Vec(myVocabList, doc)
+        trainVecList.append(docVec)
+
+    nbModel = bayes.trainNBModel(trainVecList, y_train)
+
+    testVecList = []
     for doc in X_test:
-        metricVec = bayes.setOfWords2Vec(myVocabList, doc)
-        testMetricVecList.append(metricVec)
-    predictList = bayes.predictData(nbModel, testMetricVecList)
+        docVec = bayes.setOfWords2Vec(myVocabList, doc)
+        testVecList.append(docVec)
+
+    predictList = bayes.predictData(nbModel, testVecList)
     print("predictList is ")
     print(predictList)
 
     print("testList is ")
-    print(y_test)
+    print(y_test.values)
 
+    print("score is :")
+    print(bayes.score(predictList, y_test.values))
 

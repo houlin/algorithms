@@ -13,29 +13,12 @@ class NBModel:
         self.pc0VocabList = pc0VocabList
         self.pc1VocabList = pc1VocabList
 
-    def displayCount(self):
+    def toString(self):
         print
         "NBModel %s" % NBModel.testStr
 
 
-#
-# def loadDataSet():
-#     postingList = [['my', 'dog', 'has', 'flea', \
-#                     'problems', 'help', 'please'],
-#                    ['maybe', 'not', 'take', 'him', \
-#                     'to', 'dog', 'park', 'stupid'],
-#                    ['my', 'dalmation', 'is', 'so', 'cute', \
-#                     'I', 'love', 'him'],
-#                    ['stop', 'posting', 'stupid', 'worthless', 'garbage'],
-#                    ['mr', 'licks', 'ate', 'my', 'steak', 'how', \
-#                     'to', 'stop', 'him'],
-#                    ['quit', 'buying', 'worthless', 'dog', 'food', 'stupid']
-#                    ]
-#     classVec = [0, 1, 0, 1, 0, 1]  # 1 is abusive, 0 is not
-#     return postingList, classVec
-
-
-def loadDataSet2():
+def loadDataSet():
     import string
     factor = 0.2
     doc_list = ["Get the perfect shot with this $7 Aukey tripod stand for your phone ",
@@ -159,14 +142,14 @@ def trainNBModel(metricVecList, classList):
     return nbModel
 
 
-def predictData(nbModel, metricVecList):
+def predictData(nbModel, vecList):
     predictList = []
-    for mv in metricVecList:
+    for vec in vecList:
         pw = 1
         pw_c0 = 1
         pw_c1 = 1
 
-        for i, v in enumerate(mv):
+        for i, v in enumerate(vec):
             if v:
                 pw = pw * nbModel.pVocabList[i]
                 pw_c0 = pw_c0 * nbModel.pc0VocabList[i]
@@ -188,10 +171,10 @@ def creatVocabList(dataSet):
     return list(vocabSet)
 
 
-def setOfWords2Vec(vocabList, inputSet):
+def setOfWords2Vec(vocabList, doc_words):
     vocabListLength = len(vocabList)
     returnVec = [0] * vocabListLength
-    for w in inputSet:
+    for w in doc_words:
         try:
             index = vocabList.index(w)
             if index >= 0 and index < vocabListLength:
@@ -200,3 +183,15 @@ def setOfWords2Vec(vocabList, inputSet):
             pass
 
     return returnVec
+
+
+def score(predict_list, test_list):
+    size = len(predict_list)
+    right_num = 0
+    if len(test_list) == size:
+        for i in test_list:
+            if predict_list[i] == test_list[i]:
+                right_num = right_num + 1
+        return right_num * 1.0 / size
+    else:
+        raise Exception('predict_list size not equal to test_list size!')
