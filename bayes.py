@@ -6,10 +6,9 @@ class NBModel:
     'NBModel'
     testStr = 'This is NBModel.'
 
-    def __init__(self, pc0, pc1, pVocabList, pc0VocabList, pc1VocabList):
+    def __init__(self, pc0, pc1, pc0VocabList, pc1VocabList):
         self.pc0 = pc0
         self.pc1 = pc1
-        self.pVocabList = pVocabList
         self.pc0VocabList = pc0VocabList
         self.pc1VocabList = pc1VocabList
 
@@ -110,12 +109,10 @@ def trainNBModel(metricVecList, classList):
     pc0 = c0_num / docNum
     pc1 = c1_num / docNum
 
-    pVocabList = [0.0] * vocabLength
     pc0VocabList = [0.0] * vocabLength
     pc1VocabList = [0.0] * vocabLength
 
     for i in list(range(vocabLength)):
-        w_cur_num = 0
         w_c0_cur_num = 0
         w_c1_cur_num = 0
         c0_cur_num = 0
@@ -127,36 +124,32 @@ def trainNBModel(metricVecList, classList):
             if c == 1:
                 c1_cur_num = c1_cur_num + 1
 
-            if metricVecList[j][i] == 1:
-                w_cur_num = w_cur_num + 1
+            if metricVecList[j][i] >= 1:
                 if c == 0:
                     w_c0_cur_num = w_c0_cur_num + 1
                 if c == 1:
                     w_c1_cur_num = w_c1_cur_num + 1
 
-        pVocabList[i] = w_cur_num / docNum
         pc0VocabList[i] = w_c0_cur_num / c0_cur_num
         pc1VocabList[i] = w_c1_cur_num / c1_cur_num
 
-    nbModel = NBModel(pc0, pc1, pVocabList, pc0VocabList, pc1VocabList)
+    nbModel = NBModel(pc0, pc1, pc0VocabList, pc1VocabList)
     return nbModel
 
 
 def predictData(nbModel, vecList):
     predictList = []
     for vec in vecList:
-        pw = 1
         pw_c0 = 1
         pw_c1 = 1
 
         for i, v in enumerate(vec):
             if v:
-                pw = pw * nbModel.pVocabList[i]
                 pw_c0 = pw_c0 * nbModel.pc0VocabList[i]
                 pw_c1 = pw_c1 * nbModel.pc1VocabList[i]
 
-        pc0_w = pw_c0 * nbModel.pc0 / pw
-        pc1_w = pw_c1 * nbModel.pc1 / pw
+        pc0_w = pw_c0 * nbModel.pc0
+        pc1_w = pw_c1 * nbModel.pc1
         if pc0_w > pc1_w:
             predictList.append(0)
         else:
@@ -178,7 +171,7 @@ def setOfWords2Vec(vocabList, doc_words):
         try:
             index = vocabList.index(w)
             if index >= 0 and index < vocabListLength:
-                returnVec[index] = 1
+                returnVec[index] = returnVec[index] + 1
         except:
             pass
 
@@ -196,3 +189,29 @@ def score(predict_list, test_list):
         raise Exception('predict_list size not equal to test_list size!')
 
     return (right_num * 1.0) / (size * 1.0)
+
+if __name__ == "__main__":
+    X_train, y_train, X_test, y_test = loadDataSet()
+    myVocabList = creatVocabList(X_train)
+
+    trainVecList = []
+    for doc in X_train:
+        docVec = setOfWords2Vec(myVocabList, doc)
+        trainVecList.append(docVec)
+
+    nbModel = trainNBModel(trainVecList, y_train)
+
+    testVecList = []
+    for doc in X_test:
+        docVec = setOfWords2Vec(myVocabList, doc)
+        testVecList.append(docVec)
+
+    predictList = predictData(nbModel, testVecList)
+    print("predictList is ")
+    print(predictList)
+
+    print("testList is ")
+    print(y_test.values)
+
+    print("score is :")
+    print(score(predictList, y_test.values))
